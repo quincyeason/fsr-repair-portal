@@ -1,0 +1,1603 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#0b0e0b" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="FSR – Repairs" />
+    <link rel="icon" href="data:," />
+    <title>FSR – Repairs</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --bg: #0b0e0b;
+        --panel: #151a15;
+        --panel-2: #1b211b;
+        --line: #2b332b;
+        --text: #f2f5f2;
+        --muted: #a7b3a7;
+        --green: #22c55e;
+        --green-dark: #16a34a;
+        --green-ink: #04150a;
+        --red: #f87171;
+        color-scheme: dark;
+      }
+      * { box-sizing: border-box; }
+      html { -webkit-text-size-adjust: 100%; overflow-x: hidden; }
+      body {
+        margin: 0;
+        overflow-x: hidden;
+        background: var(--bg);
+        color: var(--text);
+        font-family: "Archivo", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        font-size: 16px;
+        line-height: 1.4;
+        /* Phone-first: the form IS the page — no box, no inner scroll */
+        min-height: 100dvh;
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+      }
+      main {
+        box-sizing: border-box;
+        width: 100%;
+        max-width: 520px;
+        margin: 0 auto;
+        padding: 20px 16px 32px;
+        padding-top: calc(20px + env(safe-area-inset-top, 0px));
+      }
+
+      /* One short screen at a time — only the active step shows */
+      .step { display: none; }
+      .step.active { display: block; }
+
+      /* Headers */
+      header { text-align: center; margin-bottom: 14px; }
+      header h1 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 800;
+        letter-spacing: -0.01em;
+      }
+      header p {
+        margin: 3px 0 0;
+        font-size: 14px;
+        color: var(--muted);
+      }
+      h2 {
+        margin: 0 0 12px;
+        font-size: 20px;
+        font-weight: 800;
+      }
+      .back-link {
+        display: inline-block;
+        background: none;
+        border: none;
+        padding: 6px 0;
+        margin-bottom: 10px;
+        color: var(--green);
+        font-size: 15px;
+        font-weight: 700;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      /* Buttons — big phone targets */
+      button { font-family: inherit; cursor: pointer; }
+      .btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        width: 100%;
+        min-height: 54px;
+        padding: 12px 16px;
+        border-radius: 12px;
+        border: 1px solid var(--line);
+        background: var(--panel-2);
+        color: var(--text);
+        font-size: 16px;
+        font-weight: 700;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .btn:active { transform: scale(0.99); }
+      .btn:disabled { opacity: 0.6; cursor: default; }
+      .btn-green {
+        background: var(--green);
+        border-color: var(--green);
+        color: var(--green-ink);
+      }
+      .btn-green:active { background: var(--green-dark); }
+      .btn-row { display: flex; gap: 10px; }
+      .btn-row .btn { flex: 1; }
+
+      .add-btn {
+        width: 100%;
+        min-height: 46px;
+        padding: 8px 10px;
+        border-radius: 10px;
+        border: 1px dashed var(--line);
+        background: transparent;
+        color: var(--green);
+        font-size: 15px;
+        font-weight: 700;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .pickup-link {
+        display: block;
+        width: 100%;
+        margin-top: 14px;
+        padding: 10px 0 0;
+        background: none;
+        border: none;
+        color: var(--green);
+        font-size: 15px;
+        font-weight: 700;
+        text-align: center;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      /* Machine rows — one clean row per machine */
+      .rows { display: grid; gap: 10px; margin-top: 14px; }
+      .row-btn {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        width: 100%;
+        min-height: 62px;
+        padding: 13px 16px;
+        border-radius: 12px;
+        border: 1.5px solid var(--line);
+        background: var(--panel);
+        color: var(--text);
+        text-align: left;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .row-btn .row-name { font-size: 17px; font-weight: 800; line-height: 1.2; }
+      .row-btn .row-meta {
+        margin-top: 3px;
+        font-size: 13px;
+        color: var(--muted);
+        font-variant-numeric: tabular-nums;
+      }
+      .row-btn .row-delivered {
+        margin-top: 2px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .row-btn .row-delivered.not-delivered { color: #dc2626; font-weight: 700; }
+      .row-btn .row-arrow { color: var(--green); font-size: 20px; font-weight: 800; flex: none; }
+
+      /* Chosen-machine bar on the details step */
+      .machine-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        border: 1.5px solid var(--green);
+        background: #12241a;
+        border-radius: 12px;
+        padding: 12px 14px;
+        margin-bottom: 14px;
+      }
+      .machine-bar .mb-name { font-size: 17px; font-weight: 800; color: var(--green); }
+      .machine-bar .mb-meta { margin-top: 3px; font-size: 13.5px; color: var(--muted); word-break: break-all; }
+
+      /* Quincy's complaint — why the machine is here (read-only) */
+      .complaint-box {
+        border: 1px solid var(--line);
+        background: #1a1f1a;
+        border-radius: 12px;
+        padding: 12px 14px;
+        margin-bottom: 14px;
+      }
+      .complaint-box .cb-label { font-size: 14px; font-weight: 800; color: #dc2626; margin-bottom: 4px; }
+      .complaint-box .cb-text { font-size: 15.5px; line-height: 1.45; color: #dc2626; }
+
+      /* Parts ordered for this machine (read-only, from the sheet) */
+      .parts-ordered-box {
+        border: 1px solid var(--line);
+        background: #1a1f1a;
+        border-radius: 12px;
+        padding: 12px 14px;
+        margin-bottom: 14px;
+      }
+      .parts-ordered-box .po-label { font-size: 14px; font-weight: 800; color: var(--text); margin-bottom: 6px; }
+      .parts-ordered-box .po-row { display: flex; justify-content: space-between; gap: 12px; font-size: 15px; line-height: 1.5; color: var(--text); }
+      .parts-ordered-box .po-row span:last-child { white-space: nowrap; font-weight: 700; }
+      .parts-ordered-box .po-total { display: flex; justify-content: space-between; gap: 12px; font-size: 15px; font-weight: 800; border-top: 1px solid var(--line); margin-top: 6px; padding-top: 6px; }
+      .parts-ordered-box .po-total span:last-child { white-space: nowrap; }
+      .machine-bar .change-btn {
+        background: none;
+        border: none;
+        padding: 6px 0 6px 8px;
+        color: var(--green);
+        font-size: 15px;
+        font-weight: 700;
+        text-decoration: underline;
+        flex: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      /* Forms — 16px inputs so the phone keyboard never zooms the page */
+      label.field { display: block; margin-bottom: 12px; }
+      label.field > span {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 14px;
+        font-weight: 700;
+      }
+      .form-row { display: grid; grid-template-columns: 1fr; gap: 10px; }
+      .form-row > * { min-width: 0; }
+      input, select, textarea {
+        width: 100%;
+        min-width: 0;
+        min-height: 50px;
+        padding: 12px;
+        border-radius: 10px;
+        border: 1px solid var(--line);
+        background: var(--panel);
+        color: var(--text);
+        font-family: inherit;
+        font-size: 16px;
+      }
+      /* Date and labor fields: full width like everything else on the screen.
+         iPhone forces the date value to the middle and ignores left-align, so the
+         labor value is centered too — the two fields match exactly. */
+      input[type="date"], input[type="number"] { width: 100%; text-align: center; }
+      /* Cost field: no spinner arrows, so it matches the date field exactly */
+      input[type="number"]::-webkit-outer-spin-button,
+      input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+      input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
+      /* Date field: the visible box is a plain element (exact width, centered text).
+         The real date input sits invisibly on top of it, so tapping the box still
+         opens the phone's date picker — the native date input itself renders too
+         wide on iPhone and cannot be sized down. */
+      .date-wrap { position: relative; display: block; }
+      .date-display {
+        display: flex; align-items: center; justify-content: center;
+        width: 100%; min-height: 50px; padding: 12px;
+        border-radius: 10px; border: 1px solid var(--line);
+        background: var(--panel); color: var(--text);
+        font-size: 16px; pointer-events: none;
+      }
+      .date-wrap input[type="date"] {
+        position: absolute; inset: 0; width: 100%; height: 100%;
+        min-height: 0; margin: 0; padding: 0; border: 0;
+        opacity: 0; background: transparent;
+        -webkit-appearance: none; appearance: none; cursor: pointer;
+      }
+      textarea { min-height: 96px; resize: vertical; }
+      input:focus, select:focus, textarea:focus {
+        outline: 2px solid var(--green);
+        outline-offset: 0;
+        border-color: var(--green);
+      }
+      /* Repair parts — one row per part: name + cost, with + to add more.
+         Total cost is read-only and calculated from parts + labor. */
+      .part-row { display: flex; gap: 8px; margin-bottom: 8px; }
+      .part-row input { min-width: 0; }
+      .part-row input[type="text"] { flex: 1 1 auto; }
+      .part-row input[type="number"] { flex: 0 0 104px; width: 104px; }
+      .part-remove {
+        flex: 0 0 44px;
+        min-height: 50px;
+        border-radius: 10px;
+        border: 1px solid var(--line);
+        background: var(--panel);
+        color: var(--muted);
+        font-size: 22px;
+        line-height: 1;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .btn-add-part { margin-top: 2px; }
+      #fTotal { text-align: center; font-weight: 800; color: var(--green); }
+      .status-seg { display: flex; flex-direction: column; gap: 8px; }
+      .status-opt {
+        flex: 1 1 0;
+        min-width: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        min-height: 54px;
+        padding: 9px 4px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: var(--panel);
+        font-size: 14px;
+        font-weight: 700;
+        line-height: 1.25;
+        cursor: pointer;
+      }
+      .status-opt input { position: absolute; left: 0; opacity: 0; pointer-events: none; }
+      .status-opt:has(input:checked) { border-color: var(--green); background: #12241a; color: var(--green); }
+
+      /* Total amount owed — home screen, between the machines and Request Pickup */
+      .total-owed {
+        display: flex; align-items: center; justify-content: space-between;
+        margin-top: 14px; padding: 14px 16px;
+        border-radius: 12px; border: 1.5px solid var(--line);
+        background: var(--panel); font-size: 16px;
+      }
+      .total-owed span { font-weight: 700; }
+      .total-owed strong { font-size: 18px; font-weight: 800; color: var(--green); }
+
+      /* Completed machines — below Request Pickup, green text */
+      .completed-section { margin-top: 18px; }
+      .completed-section h2 { font-size: 18px; margin-bottom: 10px; }
+      .completed-section .row-btn { border-color: var(--green); }
+      .completed-section .row-name, .completed-section .row-meta { color: var(--green); }
+
+      /* History — background audit trail (History tab), newest first */
+      .history-link {
+        display: block; margin: 18px auto 0; padding: 8px 14px;
+        background: none; border: none; color: var(--muted);
+        font-size: 14px; text-decoration: underline; cursor: pointer;
+      }
+      .history-note { font-size: 14px; color: var(--muted); margin: 0 0 14px; }
+      .history-row {
+        border: 1px solid var(--line); border-radius: 10px;
+        padding: 10px 12px; margin-bottom: 8px; background: var(--panel);
+      }
+      .history-row .h-ts { font-size: 12px; color: var(--muted); }
+      .history-row .h-change { font-size: 15px; font-weight: 700; margin-top: 2px; }
+      .history-row .h-detail {
+        font-size: 14px; color: var(--muted); margin-top: 2px;
+        overflow-wrap: anywhere; white-space: pre-wrap;
+      }
+      .error {
+        display: none;
+        margin: 0 0 12px;
+        color: var(--red);
+        font-weight: 700;
+        font-size: 15px;
+      }
+      .error.show { display: block; }
+
+      /* Saved confirmation */
+      .saved-panel {
+        display: none;
+        border: 1.5px solid var(--green);
+        border-radius: 12px;
+        background: #12241a;
+        padding: 16px;
+      }
+      .saved-panel.show { display: block; }
+      .saved-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 19px;
+        font-weight: 800;
+        color: var(--green);
+      }
+      .saved-title .check {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 30px; height: 30px;
+        border-radius: 50%;
+        background: var(--green);
+        color: var(--green-ink);
+        font-size: 17px;
+        flex: none;
+      }
+      .saved-actions { display: grid; gap: 10px; margin-top: 14px; }
+
+      .pickup-confirm {
+        display: none;
+        margin: 12px 0 0;
+        font-weight: 700;
+        color: var(--green);
+        font-size: 15px;
+        text-align: center;
+      }
+      .pickup-confirm.show { display: block; }
+      .pickup-confirm.err { color: #c0392b; }
+
+      /* History — collapsed by default */
+      details.history { margin-top: 18px; }
+      details.history summary {
+        font-size: 17px;
+        font-weight: 800;
+        cursor: pointer;
+        list-style: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+      details.history summary::-webkit-details-marker { display: none; }
+      details.history summary::after {
+        content: " ▸";
+        color: var(--green);
+        font-size: 15px;
+      }
+      details.history[open ] summary::after { content: " ▾"; }
+      .history-empty { color: var(--muted); font-size: 15px; margin: 12px 0 0; }
+      .hist-item {
+        border: 1px solid var(--line);
+        background: var(--panel);
+        border-radius: 12px;
+        padding: 12px 14px;
+        margin-top: 10px;
+      }
+      .hist-item .h-name { font-size: 16px; font-weight: 800; }
+      .hist-item .h-meta { margin-top: 3px; font-size: 13.5px; color: var(--muted); word-break: break-all; }
+      .hist-item .h-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px 14px;
+        margin-top: 9px;
+        font-size: 15px;
+        font-weight: 600;
+      }
+      .hist-item .h-issue { margin-top: 7px; font-size: 15px; white-space: pre-wrap; }
+      .pill {
+        display: inline-block;
+        padding: 2px 10px;
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: 700;
+        background: #12241a;
+        color: var(--green);
+        border: 1px solid var(--green);
+      }
+      .pill.warn { background: #2a1a12; color: #fbbf24; border-color: #fbbf24; }
+      .pill.bad { background: #2a1212; color: var(--red); border-color: var(--red); }
+      .hist-pickup {
+        border: 1px dashed var(--green);
+        border-radius: 12px;
+        padding: 12px 14px;
+        margin-top: 10px;
+        font-weight: 700;
+        color: var(--green);
+        font-size: 15px;
+      }
+      .hidden { display: none !important; }
+      .photo-preview {
+        display: none;
+        width: 100%;
+        margin-top: 12px;
+        border-radius: 12px;
+        border: 1px solid var(--line);
+      }
+      .photo-preview.show { display: block; }
+      .hint { margin: 9px 0 0; font-size: 14px; color: var(--muted); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <!-- STEP 1 — Pick a machine -->
+      <section class="step active" id="stepPick">
+        <header>
+          <h1>Machines in repair</h1>
+          <p id="machineCount"></p>
+        </header>
+
+        <button type="button" class="add-btn" id="addMachineBtn">+ Add machine not listed</button>
+
+        <div class="rows" id="machineRows"></div>
+
+        <div class="total-owed">
+          <span>Total amount owed</span>
+          <strong id="totalOwedAmount">$0.00</strong>
+        </div>
+
+        <button type="button" class="pickup-link" id="pickupLinkBtn">Request Pickup</button>
+        <p class="pickup-confirm" id="pickupConfirmPick"></p>
+
+        <div class="completed-section" id="completedSection" hidden>
+          <h2>Completed</h2>
+          <div class="rows" id="completedRows"></div>
+        </div>
+
+        <button type="button" class="history-link" id="historyLinkBtn">View history</button>
+      </section>
+
+      <!-- STEP 1c — History (background audit trail, newest first) -->
+      <section class="step" id="stepHistory">
+        <button type="button" class="back-link" id="historyBackBtn">← All machines</button>
+        <h2>History</h2>
+        <p class="history-note">Every change to this page is logged here, newest first — kept for two weeks so mistakes can be checked and fixed.</p>
+        <div id="historyRows"></div>
+        <p class="error" id="historyError">Couldn't load the history right now. Try again in a moment.</p>
+      </section>
+
+      <!-- STEP 1b — Manual entry for an unlisted machine -->
+      <section class="step" id="stepManual">
+        <button type="button" class="back-link" id="manualBackBtn">← All machines</button>
+        <h2>Add a machine</h2>
+        <p style="margin:0 0 14px; font-size:15px;">If machine isn't listed, please fill out manually</p>
+
+        <p class="error" id="manualError">Please fill in brand, model, serial, and type.</p>
+
+        <div class="form-row">
+          <label class="field">
+            <span>Brand</span>
+            <input type="text" id="mBrand" autocomplete="off" />
+          </label>
+          <label class="field">
+            <span>Model</span>
+            <input type="text" id="mModel" autocomplete="off" />
+          </label>
+        </div>
+        <div class="form-row">
+          <label class="field">
+            <span>Serial</span>
+            <input type="text" id="mSerial" autocomplete="off" />
+          </label>
+          <label class="field">
+            <span>Type</span>
+            <select id="mType">
+              <option value="">Select type</option>
+              <option value="Washer">Washer</option>
+              <option value="Dryer">Dryer</option>
+              <option value="Refrigerator">Refrigerator</option>
+            </select>
+          </label>
+        </div>
+        <input type="file" id="platePhoto" accept="image/*" capture="environment" class="hidden" />
+        <button type="button" class="btn btn-green" id="photoBtn">Take picture of model plate</button>
+        <img id="photoPreview" class="photo-preview" alt="Model plate photo preview" />
+        <p class="hint">Please make sure picture is clear and readable.</p>
+
+        <div style="margin-top:16px;">
+          <button type="button" class="btn btn-green" id="manualContinueBtn">Continue →</button>
+        </div>
+      </section>
+
+      <!-- STEP 2 — Repair details for the chosen machine -->
+      <section class="step" id="stepRepair">
+        <button type="button" class="back-link" id="repairBackBtn">← Back to machines</button>
+        <h2>Repair details</h2>
+
+        <div class="machine-bar" id="machineBar">
+          <div>
+            <div class="mb-name" id="mbName"></div>
+            <div class="mb-meta" id="mbMeta"></div>
+          </div>
+        </div>
+
+        <div class="complaint-box" id="complaintBox" hidden>
+          <div class="cb-label">Complaint</div>
+          <div class="cb-text" id="complaintText"></div>
+        </div>
+
+        <div class="parts-ordered-box" id="partsOrderedBox" hidden>
+          <div class="po-label">Parts ordered</div>
+          <div id="partsOrderedList"></div>
+        </div>
+        <div class="parts-ordered-box" id="savedCostBox" hidden>
+          <div class="po-label">Saved repair cost</div>
+          <div id="savedCostList"></div>
+        </div>
+
+        <div id="formWrap">
+          <p class="error" id="formError">Please fill in all fields.</p>
+
+          <label class="field">
+            <span>Repair date</span>
+            <span class="date-wrap">
+              <span class="date-display" id="fDateDisplay"></span>
+              <input type="date" id="fDate" aria-label="Repair date" />
+            </span>
+          </label>
+
+          <label class="field">
+            <span>Repair Issue and Solution</span>
+            <textarea id="fIssue" rows="3" aria-label="Repair Issue and Solution"></textarea>
+          </label>
+
+          <div class="field" style="margin-bottom:14px;">
+            <span style="display:block; margin-bottom:6px; font-size:14px; font-weight:700;">Repair parts</span>
+            <div id="partsList"></div>
+            <button type="button" class="btn btn-add-part" id="addPartBtn">+ Add part</button>
+          </div>
+
+          <label class="field">
+            <span>Labor cost ($)</span>
+            <input type="number" id="fLabor" inputmode="decimal" min="0" step="0.01" placeholder="0.00" aria-label="Labor cost ($)" />
+          </label>
+
+          <label class="field">
+            <span>Total cost</span>
+            <input type="text" id="fTotal" readonly aria-label="Total cost" value="$0.00" />
+          </label>
+
+          <div class="field" style="margin-bottom:14px;">
+            <span style="display:block; margin-bottom:6px; font-size:14px; font-weight:700;">Repair status</span>
+            <div class="status-seg" role="radiogroup" aria-label="Repair status">
+              <label class="status-opt"><input type="radio" name="fStatus" value="Yes — fixed and ready" aria-label="Repair complete ready for pick up" /> Repair complete ready for pick up</label>
+              <label class="status-opt"><input type="radio" name="fStatus" value="No — still needs work" aria-label="Repair not complete" /> Repair not complete</label>
+              <label class="status-opt"><input type="radio" name="fStatus" value="Not repairable" aria-label="Unrepairable" /> Unrepairable</label>
+            </div>
+          </div>
+
+          <div class="btn-row">
+            <button type="button" class="btn btn-green" id="saveBtn">Save Changes</button>
+          </div>
+        </div>
+
+        <div class="saved-panel" id="savedPanel">
+          <div class="saved-title"><span class="check">✓</span> Repair saved</div>
+          <div class="saved-actions">
+            <button type="button" class="btn" id="detailsToggleBtn">Repair details</button>
+            <button type="button" class="btn" id="anotherBtn">Log another repair</button>
+          </div>
+        </div>
+
+        <details class="history" id="historyDetails">
+          <summary>Repair History <span id="historyCount" style="color:var(--muted); font-size:15px; font-weight:600;"></span></summary>
+          <div id="historyList"></div>
+        </details>
+      </section>
+    </main>
+
+    <!-- Hidden Google Form submission target -->
+    <iframe name="gfFrame" id="gfFrame" class="hidden" title="" aria-hidden="true"></iframe>
+    <form id="gfForm" method="POST" target="gfFrame"
+      action="https://docs.google.com/forms/d/e/1FAIpQLSf3B15Gg3H3cmkm0xDw7ReP8gW2hS96ZNqwjQ52AKxkbP5o7w/formResponse">
+      <input type="hidden" name="entry.933606342" id="gSerial" />
+      <input type="hidden" name="entry.391936990" id="gBrandModel" />
+      <input type="hidden" name="entry.582308433" id="gType" />
+      <input type="hidden" name="entry.1556085804" id="gDate" />
+      <input type="hidden" name="entry.1376802826" id="gIssue" />
+      <input type="hidden" name="entry.650043533" id="gCost" />
+      <input type="hidden" name="entry.588215051" id="gStatus" />
+      <input type="hidden" name="fvv" value="1" />
+      <input type="hidden" name="draftResponse" value="[]" />
+      <input type="hidden" name="pageHistory" value="0" />
+      <input type="hidden" name="fbzx" value="-8202083123893004534" />
+      <input type="hidden" name="submissionTimestamp" value="-1" />
+      <input type="hidden" name="submit" value="Submit" />
+    </form>
+
+    <script>
+      var MACHINES = [
+        { brand: "Hotpoint",  type: "Dryer",  model: "GTX22EASK0WW", serial: "ML720058C" },
+        { brand: "Samsung",   type: "Washer", model: "WA40J3000AW/A2", serial: "0DLC5AUG806962W", complaint: "Sometimes there is rust in the water, and it has balance issues." },
+        { brand: "Samsung",   type: "Washer", model: "WA50R5400AW/US", serial: "01G357BM503269A", complaint: "Balance issue." },
+        { brand: "Samsung",   type: "Dryer",  model: "DVE50R5400W/A3", serial: "0AYH5BAM900579" },
+        { brand: "Maytag",    type: "Dryer",  model: "MEDC465HW0",    serial: "M84618235" },
+        { brand: "Amana",     type: "Dryer",  model: "NED4655EW1",    serial: "M91401265" },
+        { brand: "Whirlpool", type: "Washer", model: "WTW4855HW3",   serial: "CB4600855" },
+        { brand: "Whirlpool", type: "Dryer",  model: "WED8000BW0",  serial: "M35021980", complaint: "Timer is not working properly — burning holes in clothing." }
+      ];
+      // Live state lives in a Google Sheet ("FSR – Repair Portal State"):
+      // completed serials, delivered serials, and Quincy's complaint notes.
+      // The sheet is the source of truth — Friday's hourly watch updates it
+      // and this page reads it on every load, so no redeploy is ever needed
+      // when a machine completes, gets delivered, or gets a complaint note.
+      // The values baked in below are ONLY a fallback, used if the sheet
+      // cannot be reached (offline, slow connection) so the page still works
+      // exactly as before instead of going blank.
+      //
+      // Fill in SHEET_CSV_URL with the sheet's published CSV link
+      // (Publish to web, or the "anyone with the link" gviz CSV link).
+      var SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1TYAVcYtUnc8Btb0ySdd_d2-j-W8-DHx71c9UUHVt_E8/gviz/tq?tqx=out:csv&sheet=State";
+      // Complaints are Quincy's notes on what each machine is doing wrong —
+      // shown on the machine's repair screen so the repair guy knows why it
+      // is here. Friday keeps this list in the sheet; Quincy tells her what
+      // to put here.
+      // Completed serials, synced from the Google Form by Friday's hourly watch —
+      // a machine stays here until Quincy says to move it to stored inventory,
+      // when it is removed from the form entirely. The watch writes them to
+      // the sheet now, not into this page.
+      var COMPLETED_SERIALS = [];
+      // Delivered to the repair guy — Friday keeps this list in the sheet.
+      // Quincy tells her when he delivers a machine and she adds its serial
+      // there. Any machine on the form whose serial is NOT in this list shows
+      // "Not delivered" in red. The baked-in fallback MUST list every
+      // delivered machine: the sheet fetch takes a moment, and any serial
+      // missing here flickers "Not delivered" on load until it arrives.
+      var DELIVERED_SERIALS = ["M02530588", "ML720058C", "C84670811", "M10608801", "M93085243", "C92223558", "0DLC5AUG806962W", "0AYH5BAM900579"];
+      // Parts Used (entry.821095580) is intentionally never sent — left blank on the Google Form.
+
+      var currentMachine = null; // the machine being repaired on step 2
+      var photoUrl = null;       // object URL of plate photo preview (stays on this phone only)
+      var editingId = null;      // session repair record being edited after save
+
+      // Repair history, kept on this phone (localStorage) so a saved repair
+      // still shows after a reload — the Google Form is the server-side
+      // record, this is the on-device copy. Previously session-only, so a
+      // reload wiped the history and a save looked lost even though the
+      // form had it. Capped so the stored list stays small.
+      var HISTORY_KEY = "fsrHistoryV1";
+      var sessionRepairs = [];
+      var sessionPickups = [];
+      function loadStoredHistory() {
+        try {
+          var raw = JSON.parse(localStorage.getItem(HISTORY_KEY) || "null");
+          if (raw && Array.isArray(raw.repairs)) sessionRepairs = raw.repairs;
+          if (raw && Array.isArray(raw.pickups)) sessionPickups = raw.pickups;
+        } catch (e) { sessionRepairs = []; sessionPickups = []; }
+      }
+      function storeHistory() {
+        try {
+          localStorage.setItem(HISTORY_KEY, JSON.stringify({
+            repairs: sessionRepairs.slice(0, 100),
+            pickups: sessionPickups.slice(0, 20)
+          }));
+        } catch (e) {}
+      }
+
+      // Pending Google Form submission awaiting iframe confirmation
+      var pendingKind = null;   // "repair" | "pickup"
+      var pendingDone = null;
+      var pendingError = null;
+      var pendingTimer = null;
+
+      function $(id) { return document.getElementById(id); }
+      function esc(s) {
+        return String(s == null ? "" : s)
+          .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+      }
+      function fmtDate(iso) {
+        if (!iso) return "";
+        var parts = iso.split("-");
+        if (parts.length !== 3) return iso;
+        var d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+        return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+      }
+      function syncDateDisplay() {
+        $("fDateDisplay").textContent = fmtDate($("fDate").value);
+      }
+      function renderTotal() {
+        // Home screen "Total amount owed" is labor only — parts are not
+        // included. It sums labor for every machine in the Completed
+        // (ready for pickup) section, reading each machine's labor from
+        // the sheet — the shared record — so the total is right on every
+        // phone, not just the one the repair was saved on. A repair saved
+        // on this phone but not yet synced to the sheet counts from the
+        // on-device history instead; a machine is never counted twice.
+        // Picked-up machines are NOT counted (Quinn, Nov 16): he pays the
+        // total owed when he picks machines up, so the moment a machine
+        // is picked up its labor drops out of the owed total — the total
+        // reads $0.00 once every completed machine has been picked up.
+        // The machine's own saved costs still show on its page during
+        // the 24h "Picked up" window, and the permanent history keeps
+        // the real figures forever.
+        var total = 0;
+        MACHINES.forEach(function (m) {
+          if (!isCompleted(m.serial)) return;
+          if (isPickedUp(m)) return;
+          var labor = parseFloat(m.labor);
+          if (!isNaN(labor)) { total += labor; return; }
+          for (var i = 0; i < sessionRepairs.length; i++) {
+            if (sessionRepairs[i].serial === m.serial && sessionRepairs[i].status === "Yes — fixed and ready") {
+              total += parseFloat(sessionRepairs[i].labor) || 0;
+              break;
+            }
+          }
+        });
+        $("totalOwedAmount").textContent = fmtMoney(total);
+      }
+      function fmtMoney(n) {
+        var num = Number(n);
+        if (isNaN(num)) return "$" + esc(n);
+        return "$" + num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      }
+      function todayISO() {
+        var t = new Date();
+        var mm = String(t.getMonth() + 1).padStart(2, "0");
+        var dd = String(t.getDate()).padStart(2, "0");
+        return t.getFullYear() + "-" + mm + "-" + dd;
+      }
+
+      /* ---------- Steps: one short screen at a time ---------- */
+      function showStep(name) {
+        ["stepPick", "stepManual", "stepRepair", "stepHistory"].forEach(function (id) {
+          $(id).classList.toggle("active", id === name);
+        });
+        // Coming back to the machine list disarms the pickup button.
+        if (name === "stepPick") disarmPickup();
+      }
+
+      /* ---------- History (background audit trail, History tab) ---------- */
+      // One row per change, newest first. Read live from the sheet — no
+      // deploy needed when new history lands. The tab is append-only and
+      // is cleared after a two-week clean review (see the watch script).
+      var HISTORY_CSV_URL = "https://docs.google.com/spreadsheets/d/1TYAVcYtUnc8Btb0ySdd_d2-j-W8-DHx71c9UUHVt_E8/gviz/tq?tqx=out:csv&sheet=History";
+      var historyLoaded = false;
+      function openHistory() {
+        showStep("stepHistory");
+        if (!historyLoaded) loadHistory();
+      }
+      function loadHistory() {
+        var box = $("historyRows");
+        var err = $("historyError");
+        err.classList.remove("show");
+        box.innerHTML = "<p class=\"history-note\">Loading history…</p>";
+        if (!HISTORY_CSV_URL || HISTORY_CSV_URL.indexOf("REPLACE_") === 0) {
+          box.innerHTML = "";
+          err.classList.add("show");
+          return;
+        }
+        try {
+          var ctl = ("AbortController" in window) ? new AbortController() : null;
+          var timer = setTimeout(function () { if (ctl) ctl.abort(); }, 8000);
+          var opts = { cache: "no-store" };
+          if (ctl) opts.signal = ctl.signal;
+          fetch(HISTORY_CSV_URL, opts)
+            .then(function (r) {
+              clearTimeout(timer);
+              if (!r.ok) throw new Error("history fetch HTTP " + r.status);
+              return r.text();
+            })
+            .then(function (text) {
+              var rows = parseCSVRows(text);
+              renderHistoryRows(rows);
+              historyLoaded = true;
+            })
+            .catch(function () {
+              clearTimeout(timer);
+              box.innerHTML = "";
+              err.classList.add("show");
+            });
+        } catch (e) {
+          box.innerHTML = "";
+          err.classList.add("show");
+        }
+      }
+      function renderHistoryRows(rows) {
+        var box = $("historyRows");
+        // Skip the header row; newest first; cap the render at 200 entries.
+        var entries = rows.slice(1).filter(function (r) { return r && r.length > 1 && (r[1] || r[2] || ""); }).reverse().slice(0, 200);
+        if (!entries.length) {
+          box.innerHTML = "<p class=\"history-note\">No history yet.</p>";
+          return;
+        }
+        var html = entries.map(function (r) {
+          var ts = esc(r[0] || "");
+          var serial = esc(r[1] || "");
+          var change = esc(r[2] || "");
+          var detail = esc(r[3] || "");
+          var title = serial ? serial + " — " + change : change;
+          return "<div class=\"history-row\"><div class=\"h-ts\">" + ts + "</div>" +
+            "<div class=\"h-change\">" + title + "</div>" +
+            (detail ? "<div class=\"h-detail\">" + detail + "</div>" : "") + "</div>";
+        }).join("");
+        if (rows.length - 1 > 200) {
+          html += "<p class=\"history-note\">Showing the 200 most recent entries.</p>";
+        }
+        box.innerHTML = html;
+      }
+
+      /* ---------- Google Form submission (fetch POST, no email step) ---------- */
+      // The old hidden-iframe submit never completed in some browsers: the
+      // iframe never fired its load event, so every save looked like a
+      // failure even though the form itself accepts submissions fine.
+      // fetch() with no-cors resolves when Google answers the POST, which
+      // is a real server confirmation in every modern browser. A network
+      // failure rejects, and the 15s timer covers a hung request — either
+      // way the repair guy sees an honest error, never a false "saved".
+      var FORM_POST_URL = "https://docs.google.com/forms/d/e/1FAIpQLSf3B15Gg3H3cmkm0xDw7ReP8gW2hS96ZNqwjQ52AKxkbP5o7w/formResponse";
+      function submitToGoogleForm(fields, kind, onDone, onError) {
+        pendingKind = kind;
+        pendingDone = onDone;
+        pendingError = onError || null;
+        if (pendingTimer) clearTimeout(pendingTimer);
+        pendingTimer = setTimeout(failPending, 15000);
+        var body = new URLSearchParams();
+        body.set("entry.933606342", fields.serial || "");
+        body.set("entry.391936990", fields.brandModel || "");
+        body.set("entry.582308433", fields.type || "");
+        body.set("entry.1556085804", fields.date || "");
+        body.set("entry.1376802826", fields.issue || "");
+        body.set("entry.650043533", fields.cost);
+        body.set("entry.588215051", fields.status || "");
+        body.set("fvv", "1");
+        body.set("draftResponse", "[]");
+        body.set("pageHistory", "0");
+        body.set("fbzx", "-8202083123893004534");
+        body.set("submissionTimestamp", "-1");
+        body.set("submit", "Submit");
+        fetch(FORM_POST_URL, { method: "POST", mode: "no-cors", body: body })
+          .then(function () { finishPending(); }, function () { failPending(); });
+      }
+      function finishPending() {
+        if (!pendingDone) return;
+        var done = pendingDone;
+        pendingDone = null;
+        pendingError = null;
+        pendingKind = null;
+        if (pendingTimer) { clearTimeout(pendingTimer); pendingTimer = null; }
+        done();
+      }
+      function failPending() {
+        if (!pendingDone && !pendingError) return;
+        var err = pendingError;
+        pendingDone = null;
+        pendingError = null;
+        pendingKind = null;
+        if (pendingTimer) { clearTimeout(pendingTimer); pendingTimer = null; }
+        if (err) err();
+      }
+      // The hidden iframe form below is no longer used for submissions
+      // (fetch replaced it — see submitToGoogleForm); it stays in the
+      // markup only so nothing else referencing it breaks.
+
+      /* ---------- Step 1: machine rows ---------- */
+      /* Completed machines stick: the serials are saved in the phone's browser
+         storage, so a machine stays in the Completed section across visits until
+         Quincy says to move it to stored inventory — then it is removed from
+         the form entirely (see the stored-inventory move, done by Friday). */
+      // Completed flags live in this phone's storage with the time they were
+      // set, so a flag can be checked against the server later. Flags written
+      // before this fix have no time attached (plain list) — those were never
+      // confirmed by the server, so they are dropped on load unless the
+      // server lists that machine completed. A flag is only a bridge for the
+      // gap until Friday's hourly watch copies the form entry to the sheet.
+      var COMPLETED_FLAG_TTL_MS = 90 * 60 * 1000; // 90 minutes
+      function storedCompleted() {
+        try {
+          var raw = JSON.parse(localStorage.getItem("fsrCompleted") || "[]");
+          if (Array.isArray(raw)) return raw.map(function (s) { return { serial: s, at: 0 }; });
+          var out = [];
+          Object.keys(raw || {}).forEach(function (s) { out.push({ serial: s, at: raw[s] || 0 }); });
+          return out;
+        } catch (e) { return []; }
+      }
+      function setStoredCompleted(serial, done) {
+        var flags = {};
+        storedCompleted().forEach(function (f) { if (f.at) flags[f.serial] = f.at; });
+        if (done) flags[serial] = Date.now();
+        else delete flags[serial];
+        try { localStorage.setItem("fsrCompleted", JSON.stringify(flags)); } catch (e) {}
+      }
+      // One-time cleanup for flags written before the save-confirm fix: they
+      // were never confirmed by the server, so drop them now. The sheet load
+      // that follows re-confirms any machine the server lists as completed.
+      function purgeLegacyCompletedFlags() {
+        try {
+          var raw = JSON.parse(localStorage.getItem("fsrCompleted") || "[]");
+          if (!Array.isArray(raw)) return;
+          if (!raw.length) return;
+          localStorage.setItem("fsrCompleted", JSON.stringify({}));
+        } catch (e) {}
+      }
+      // Drop local completed flags the server does not confirm: flags older
+      // than the bridge window with no server record. Only runs when the
+      // sheet actually loaded — offline, flags are kept.
+      function reconcileCompletedFlags(serverCompleted) {
+        var now = Date.now();
+        var kept = {};
+        var changed = false;
+        storedCompleted().forEach(function (f) {
+          var confirmed = serverCompleted.indexOf(f.serial) !== -1;
+          var fresh = f.at && (now - f.at) < COMPLETED_FLAG_TTL_MS;
+          if (confirmed || fresh) { if (f.at) kept[f.serial] = f.at; }
+          else changed = true;
+        });
+        if (changed) {
+          try { localStorage.setItem("fsrCompleted", JSON.stringify(kept)); } catch (e) {}
+        }
+      }
+      function isCompleted(serial) {
+        // A repair saved in this visit wins; otherwise fall back to the
+        // server-side completed list (Friday's watch), then the phone's own
+        // stored list — so the machine stays completed across visits and devices.
+        for (var i = 0; i < sessionRepairs.length; i++) {
+          if (sessionRepairs[i].serial === serial) return sessionRepairs[i].status === "Yes — fixed and ready";
+        }
+        if (COMPLETED_SERIALS.indexOf(serial) !== -1) return true;
+        var flags = storedCompleted();
+        for (var j = 0; j < flags.length; j++) if (flags[j].serial === serial) return true;
+        return false;
+      }
+      function isDelivered(serial) {
+        return DELIVERED_SERIALS.indexOf(serial) !== -1;
+      }
+      /* Picked up (Quinn, Nov 16): a picked-up machine stays on the repair
+         log showing "Picked up" for 24 hours, then disappears from the
+         portal entirely. The picked_up row in the sheet is the signal; the
+         watch removes the machine's other State rows at 24h, and the next
+         portal deploy removes it from the machine list. */
+      var PICKUP_TTL_MS = 24 * 60 * 60 * 1000;
+      function pickedUpAt(m) {
+        if (!m || !m.pickedUp) return null;
+        var t = Date.parse(m.pickedUp);
+        return isNaN(t) ? null : t;
+      }
+      function isPickedUp(m) {
+        var t = pickedUpAt(m);
+        return t !== null && (Date.now() - t) < PICKUP_TTL_MS;
+      }
+      function isPickupExpired(m) {
+        var t = pickedUpAt(m);
+        return t !== null && (Date.now() - t) >= PICKUP_TTL_MS;
+      }
+      function rowHtml(m, i) {
+        var delivered = isDelivered(m.serial);
+        var pickedUp = isPickedUp(m);
+        var statusHtml;
+        if (pickedUp) {
+          statusHtml = '<span class="row-delivered" style="display:block;">Picked up</span>';
+        } else {
+          statusHtml = '<span class="row-delivered' + (delivered ? "" : " not-delivered") + '" style="display:block;">' + (delivered ? "Delivered" : "Not delivered") + "</span>";
+        }
+        return '<button type="button" class="row-btn" data-index="' + i + '">' +
+          '<span><span class="row-name">' + esc(m.brand) + " " + esc(m.type) + "</span>" +
+          '<span class="row-meta" style="display:block;">' + esc(m.model) + " · " + esc(m.serial) + "</span>" +
+          statusHtml + "</span>" +
+          '<span class="row-arrow">›</span>' +
+          "</button>";
+      }
+      function renderRows() {
+        var inRepair = [], done = [];
+        MACHINES.forEach(function (m, i) {
+          if (isPickupExpired(m)) return; // picked up 24h+ ago: off the log
+          if (isCompleted(m.serial)) done.push(i);
+          else inRepair.push(i);
+        });
+        $("machineCount").textContent = inRepair.length + (inRepair.length === 1 ? " machine in repair" : " machines in repair");
+        var html = "";
+        inRepair.forEach(function (i) { html += rowHtml(MACHINES[i], i); });
+        $("machineRows").innerHTML = html;
+        var doneHtml = "";
+        done.forEach(function (i) { doneHtml += rowHtml(MACHINES[i], i); });
+        $("completedRows").innerHTML = doneHtml;
+        $("completedSection").hidden = done.length === 0;
+        var rows = document.querySelectorAll("#machineRows .row-btn, #completedRows .row-btn");
+        for (var i = 0; i < rows.length; i++) {
+          rows[i].addEventListener("click", function () {
+            selectMachine(MACHINES[Number(this.getAttribute("data-index"))]);
+          });
+        }
+        renderTotal();
+      }
+      function selectMachine(m) {
+        currentMachine = m;
+        // Fresh draft for this machine — never carry another machine's
+        // unsaved text, parts, labor or status over to this one.
+        $("fDate").value = todayISO();
+        syncDateDisplay();
+        $("fIssue").value = "";
+        $("fLabor").value = "";
+        resetParts();
+        renderTotalCost();
+        document.querySelectorAll('input[name="fStatus"]').forEach(function (r) { r.checked = false; });
+        $("formError").classList.remove("show");
+        editingId = null;
+        $("mbName").textContent = m.brand + " " + m.type;
+        $("mbMeta").textContent = "Model: " + m.model + "  ·  Serial: " + m.serial + (isPickedUp(m) ? "  ·  Picked up" : "");
+        if (m.complaint) {
+          $("complaintText").textContent = m.complaint;
+          $("complaintBox").hidden = false;
+        } else {
+          $("complaintBox").hidden = true;
+        }
+        renderPartsOrdered(m);
+        renderSavedCost(m);
+        renderHistory();
+        // Completed machines are read-only (Quinn, Nov 16): once a machine
+        // is marked complete and saved, the edit tools (issue, parts, labor,
+        // status, save) are gone from that machine's page — no lock message,
+        // just gone. The read-only boxes above still show.
+        var done = isCompleted(m.serial);
+        $("formWrap").classList.toggle("hidden", done);
+        $("detailsToggleBtn").classList.toggle("hidden", done);
+        $("savedPanel").classList.remove("show");
+        $("detailsToggleBtn").textContent = "Repair details";
+        showStep("stepRepair");
+      }
+
+      // Parts ordered for this machine — read live from the sheet (type "parts").
+      // Sheet text format: "Drum roller kit - $39.99; Heating element - $42.95; Parts total $82.94"
+      function renderPartsOrdered(m) {
+        var box = $("partsOrderedBox"), list = $("partsOrderedList");
+        var text = (m && m.parts) ? String(m.parts).trim() : "";
+        if (!text) { box.hidden = true; list.innerHTML = ""; return; }
+        var html = "";
+        text.split(";").forEach(function (chunk) {
+          var item = chunk.trim();
+          if (!item) return;
+          if (/^parts total/i.test(item)) {
+            var total = item.replace(/^parts total\s*/i, "").trim();
+            html += '<div class="po-total"><span>Parts total</span><span>' + esc(total) + '</span></div>';
+          } else {
+            var mm = item.match(/^(.*?)\s*-\s*(\$[\d,]+\.\d{2})\s*$/);
+            if (mm) html += '<div class="po-row"><span>' + esc(mm[1].trim()) + '</span><span>' + esc(mm[2]) + '</span></div>';
+            else html += '<div class="po-row"><span>' + esc(item) + '</span><span></span></div>';
+          }
+        });
+        list.innerHTML = html;
+        box.hidden = false;
+      }
+      // Saved repair cost for this machine — from the sheet (labor row +
+      // parts rows the watch wrote), so it shows on every phone, not just
+      // the one the repair was saved on. Hidden when the sheet has no
+      // costs for this machine yet.
+      function renderSavedCost(m) {
+        // Cost summary for this machine — always all three lines (Quinn,
+        // Nov 16): Total parts cost, Total labor cost, and Total cost
+        // (parts + labor combined). $0.00 when a side has nothing saved.
+        // Homepage "Total amount owed" stays labor-only; this box is the
+        // per-machine view where both sides count.
+        var box = $("savedCostBox"), list = $("savedCostList");
+        var labor = (m && m.labor != null) ? parseFloat(m.labor) : NaN;
+        var partsTotal = NaN;
+        if (m && m.parts) {
+          var pm = String(m.parts).match(/parts total\s*\$?([\d,]+\.\d{2})/i);
+          if (pm) partsTotal = parseFloat(pm[1].replace(/,/g, ""));
+          else {
+            // No "Parts total" marker — sum the individual $ amounts.
+            var sum = 0, found = false, am;
+            var re = /\$([\d,]+\.\d{2})/g;
+            while ((am = re.exec(String(m.parts)))) { sum += parseFloat(am[1].replace(/,/g, "")); found = true; }
+            if (found) partsTotal = sum;
+          }
+        }
+        var laborVal = isNaN(labor) ? 0 : labor;
+        var partsVal = isNaN(partsTotal) ? 0 : partsTotal;
+        var html = "";
+        html += '<div class="po-row"><span>Total parts cost</span><span>' + esc(fmtMoney(partsVal)) + '</span></div>';
+        html += '<div class="po-row"><span>Total labor cost</span><span>' + esc(fmtMoney(laborVal)) + '</span></div>';
+        html += '<div class="po-total"><span>Total cost</span><span>' + esc(fmtMoney(partsVal + laborVal)) + '</span></div>';
+        list.innerHTML = html;
+        box.hidden = false;
+      }
+      $("repairBackBtn").addEventListener("click", function () {
+        currentMachine = null;
+        showStep("stepPick");
+      });
+      $("addMachineBtn").addEventListener("click", function () {
+        $("manualError").classList.remove("show");
+        showStep("stepManual");
+      });
+      $("manualBackBtn").addEventListener("click", function () {
+        showStep("stepPick");
+      });
+
+      /* ---------- Manual entry / photo preview ---------- */
+      $("photoBtn").addEventListener("click", function () { $("platePhoto").click(); });
+      $("platePhoto").addEventListener("change", function () {
+        if (this.files && this.files.length > 0) {
+          // Preview only: the photo stays on this phone so the plate can be
+          // read and the details typed in above — it is not sent with the repair.
+          if (photoUrl) URL.revokeObjectURL(photoUrl);
+          photoUrl = URL.createObjectURL(this.files[0]);
+          $("photoPreview").src = photoUrl;
+          $("photoPreview").classList.add("show");
+        }
+      });
+      $("manualContinueBtn").addEventListener("click", function () {
+        var brand = $("mBrand").value.trim();
+        var model = $("mModel").value.trim();
+        var serial = $("mSerial").value.trim();
+        var type = $("mType").value;
+        if (!brand || !model || !serial || !type) {
+          $("manualError").classList.add("show");
+          return;
+        }
+        $("manualError").classList.remove("show");
+        selectMachine({ brand: brand, model: model, serial: serial, type: type });
+      });
+
+      /* ---------- Repair parts + labor + total cost ---------- */
+      // Parts are name + cost rows; the total is parts + labor, calculated
+      // automatically — the repair guy never types a total.
+      function makePartRow(withRemove) {
+        var row = document.createElement("div");
+        row.className = "part-row";
+        var name = document.createElement("input");
+        name.type = "text";
+        name.className = "part-name";
+        name.placeholder = "Part name";
+        name.setAttribute("aria-label", "Part name");
+        var cost = document.createElement("input");
+        cost.type = "number";
+        cost.className = "part-cost";
+        cost.setAttribute("inputmode", "decimal");
+        cost.min = "0";
+        cost.step = "0.01";
+        cost.placeholder = "0.00";
+        cost.setAttribute("aria-label", "Part cost ($)");
+        row.appendChild(name);
+        row.appendChild(cost);
+        if (withRemove) {
+          var remove = document.createElement("button");
+          remove.type = "button";
+          remove.className = "part-remove";
+          remove.setAttribute("aria-label", "Remove part");
+          remove.textContent = "×";
+          remove.addEventListener("click", function () {
+            row.remove();
+            if (!$("partsList").querySelector(".part-row")) $("partsList").appendChild(makePartRow(true));
+            renderTotalCost();
+          });
+          row.appendChild(remove);
+        }
+        return row;
+      }
+      function resetParts() {
+        $("partsList").innerHTML = "";
+        $("partsList").appendChild(makePartRow(true));
+        renderTotalCost();
+      }
+      function collectParts() {
+        var parts = [];
+        var rows = document.querySelectorAll("#partsList .part-row");
+        for (var i = 0; i < rows.length; i++) {
+          var name = rows[i].querySelector(".part-name").value.trim();
+          var cost = parseFloat(rows[i].querySelector(".part-cost").value) || 0;
+          if (name || cost) parts.push({ name: name, cost: cost });
+        }
+        return parts;
+      }
+      function calcTotal() {
+        var total = 0;
+        collectParts().forEach(function (p) { total += p.cost; });
+        total += parseFloat($("fLabor").value) || 0;
+        return total;
+      }
+      function renderTotalCost() {
+        $("fTotal").value = fmtMoney(calcTotal());
+      }
+      function composeIssue(issue, parts, labor) {
+        var lines = [issue];
+        if (parts.length) {
+          lines.push("Parts: " + parts.map(function (p) {
+            return p.name ? p.name + " (" + fmtMoney(p.cost) + ")" : fmtMoney(p.cost);
+          }).join("; "));
+        }
+        if (labor) lines.push("Labor: " + fmtMoney(labor));
+        return lines.join("\n");
+      }
+
+      /* ---------- Save repair ---------- */
+      function selectedStatus() {
+        var radios = document.querySelectorAll('input[name="fStatus"]');
+        for (var i = 0; i < radios.length; i++) if (radios[i].checked) return radios[i].value;
+        return "";
+      }
+
+      $("saveBtn").addEventListener("click", function () {
+        var machine = currentMachine;
+        var date = $("fDate").value;
+        var issue = $("fIssue").value.trim();
+        var status = selectedStatus();
+        if (!machine || !date || !issue || !status) {
+          $("formError").textContent = "Please fill in all fields.";
+          $("formError").classList.add("show");
+          return;
+        }
+        $("formError").classList.remove("show");
+
+        // Total is parts + labor, calculated here at save (and live as he types).
+        var parts = collectParts();
+        var labor = parseFloat($("fLabor").value) || 0;
+        var total = calcTotal();
+        var record = {
+          id: editingId || ("r" + Date.now()),
+          brand: machine.brand, type: machine.type,
+          model: machine.model, serial: machine.serial,
+          date: date, issue: composeIssue(issue, parts, labor),
+          cost: total.toFixed(2), status: status,
+          parts: parts, labor: labor
+        };
+
+        var btn = $("saveBtn");
+        btn.disabled = true;
+        btn.textContent = "Saving…";
+
+        submitToGoogleForm({
+          serial: record.serial,
+          brandModel: record.brand + " " + record.model,
+          type: record.type,
+          date: record.date,
+          issue: record.issue,
+          cost: record.cost,
+          status: record.status
+        }, "repair", function () {
+          btn.disabled = false;
+          btn.textContent = "Save Changes";
+
+          // Update the session history entry
+          var found = false;
+          for (var i = 0; i < sessionRepairs.length; i++) {
+            if (sessionRepairs[i].id === record.id) { sessionRepairs[i] = record; found = true; break; }
+          }
+          if (!found) sessionRepairs.unshift(record);
+          storeHistory();
+          editingId = record.id;
+          setStoredCompleted(record.serial, record.status === "Yes — fixed and ready");
+          renderHistory();
+          renderRows();
+
+          // Collapse the form into the saved confirmation
+          $("formWrap").classList.add("hidden");
+          $("savedPanel").classList.add("show");
+          // A machine just marked complete loses its edit tools at once:
+          // the details toggle would re-open the form, so it goes too.
+          $("detailsToggleBtn").classList.toggle("hidden", record.status === "Yes — fixed and ready");
+          $("detailsToggleBtn").textContent = "Repair details";
+        }, function () {
+          // Server never confirmed the save — nothing was recorded, so do
+          // not show "saved" and do not mark the machine completed. The
+          // form keeps what was typed so it can be sent again.
+          btn.disabled = false;
+          btn.textContent = "Save Changes";
+          $("formError").textContent = "Couldn't reach the server — this repair may NOT be saved. Check your connection and tap Save Changes again.";
+          $("formError").classList.add("show");
+        });
+      });
+
+      $("detailsToggleBtn").addEventListener("click", function () {
+        // No back door: a completed machine's form stays gone.
+        if (currentMachine && isCompleted(currentMachine.serial)) return;
+        var wrap = $("formWrap");
+        if (wrap.classList.contains("hidden")) {
+          wrap.classList.remove("hidden");
+          this.textContent = "Hide details";
+        } else {
+          wrap.classList.add("hidden");
+          this.textContent = "Repair details";
+        }
+      });
+
+      $("anotherBtn").addEventListener("click", function () {
+        // Fresh start for the next repair
+        currentMachine = null;
+        editingId = null;
+        $("fIssue").value = "";
+        resetParts();
+        $("fLabor").value = "";
+        renderTotalCost();
+        var radios = document.querySelectorAll('input[name="fStatus"]');
+        for (var i = 0; i < radios.length; i++) radios[i].checked = false;
+        $("fDate").value = todayISO();
+        syncDateDisplay();
+        $("formError").classList.remove("show");
+        renderRows();
+        showStep("stepPick");
+      });
+
+      /* ---------- Request pickup ---------- */
+      // Two-step: first tap arms it ("Confirm?"), second tap sends it.
+      var pickupArmed = false;
+      function disarmPickup() {
+        pickupArmed = false;
+        $("pickupLinkBtn").textContent = "Request Pickup";
+      }
+      function requestPickup(confirmEl) {
+        var linkBtn = $("pickupLinkBtn");
+        if (!pickupArmed) {
+          // First tap: arm the confirmation — nothing is sent yet.
+          pickupArmed = true;
+          linkBtn.textContent = "Confirm?";
+          return;
+        }
+        // Second tap on "Confirm?": send the pickup request.
+        pickupArmed = false;
+        linkBtn.textContent = "Request Pickup";
+
+        var now = new Date();
+        var when = now.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) +
+          ", " + now.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+
+        var lines = ["PICKUP REQUEST", "", "Machines in repair:"];
+        MACHINES.forEach(function (m) {
+          lines.push("- " + m.brand + " " + m.type + " — Model: " + m.model + ", Serial: " + m.serial);
+        });
+
+        linkBtn.disabled = true;
+
+        submitToGoogleForm({
+          serial: currentMachine ? currentMachine.serial : "",
+          brandModel: currentMachine ? (currentMachine.brand + " " + currentMachine.model) : "",
+          type: currentMachine ? currentMachine.type : "",
+          date: todayISO(),
+          issue: lines.join("\n"),
+          cost: "0",
+          status: "No — still needs work"
+        }, "pickup", function () {
+          linkBtn.disabled = false;
+
+          sessionPickups.unshift({ id: "p" + Date.now(), when: when, serial: currentMachine ? currentMachine.serial : "" });
+          storeHistory();
+          renderHistory();
+
+          confirmEl.classList.remove("err");
+          confirmEl.textContent = "Quincy has been notified";
+          confirmEl.classList.add("show");
+        }, function () {
+          linkBtn.disabled = false;
+          confirmEl.textContent = "Couldn't reach the server — pickup was NOT sent. Tap Request Pickup to try again.";
+          confirmEl.classList.add("err");
+          confirmEl.classList.add("show");
+        });
+      }
+      $("pickupLinkBtn").addEventListener("click", function () { requestPickup($("pickupConfirmPick")); });
+
+      /* ---------- History (this machine only, collapsed by default) ---------- */
+      function statusPill(status) {
+        if (status.indexOf("Yes") === 0) return '<span class="pill">' + esc(status) + "</span>";
+        if (status.indexOf("No") === 0) return '<span class="pill warn">' + esc(status) + "</span>";
+        return '<span class="pill bad">' + esc(status) + "</span>";
+      }
+      function renderHistory() {
+        // History is per machine: never show another machine's repairs here.
+        // (Used to render every saved repair regardless of which machine was
+        // open, so the previous machine's entry leaked onto the next one.)
+        var serial = currentMachine ? currentMachine.serial : "";
+        var repairs = serial ? sessionRepairs.filter(function (r) { return r.serial === serial; }) : [];
+        var pickups = serial ? sessionPickups.filter(function (p) { return !p.serial || p.serial === serial; }) : [];
+        var total = repairs.length + pickups.length;
+        $("historyCount").textContent = total ? "(" + total + ")" : "";
+        var html = "";
+        pickups.forEach(function (p) {
+          html += '<div class="hist-pickup">Pickup requested — ' + esc(p.when) + "</div>";
+        });
+        if (!repairs.length && !pickups.length) {
+          html = '<p class="history-empty">No repair history for this machine yet.</p>';
+        }
+        repairs.forEach(function (r) {
+          html += '<div class="hist-item">' +
+            '<div class="h-name">' + esc(r.brand) + " " + esc(r.type) + "</div>" +
+            '<div class="h-meta">Model: ' + esc(r.model) + " · Serial: " + esc(r.serial) + "</div>" +
+            '<div class="h-row"><span>' + esc(fmtDate(r.date)) + "</span><span>" + fmtMoney(r.cost) + "</span>" + statusPill(r.status) + "</div>" +
+            '<div class="h-issue">' + esc(r.issue) + "</div>" +
+            "</div>";
+        });
+        $("historyList").innerHTML = html;
+      }
+
+      /* ---------- Live state from the Google Sheet ---------- */
+      // Sheet layout (one tab, columns Type | Serial | Text):
+      //   completed | <serial> |            (one row per completed machine)
+      //   delivered | <serial> |            (one row per delivered machine)
+      //   complaint | <serial> | <Quincy's note for that machine>
+      //   parts     | <serial> | <"Part - $x.xx; Part - $x.xx; Parts total $x.xx">
+      //   labor     | <serial> | <labor amount, e.g. "160.00">
+      //   picked_up | <serial> | <ISO pickup time> (Quinn picked it up; the
+      //     portal shows "Picked up" for 24h, then hides the machine)
+      // The watch writes parts/labor rows from every repair the form
+      // receives, so costs live in the sheet — not only in the phone
+      // that saved them. The homepage labor total is built from these
+      // rows, which is why it used to read $0 on any other phone.
+      // The page renders first from the baked-in fallback above, then swaps
+      // in the sheet's values when the fetch returns. If the fetch fails for
+      // any reason, the fallback stays and the page works as before.
+      function parseCSVRows(text) {
+        // Small CSV parser: handles quoted fields, commas inside quotes,
+        // doubled quotes, and CRLF line endings. Returns raw rows.
+        var rows = [], row = [], field = "", inQuotes = false;
+        for (var i = 0; i < text.length; i++) {
+          var c = text.charAt(i);
+          if (inQuotes) {
+            if (c === '"') {
+              if (text.charAt(i + 1) === '"') { field += '"'; i++; }
+              else inQuotes = false;
+            } else field += c;
+          } else if (c === '"') inQuotes = true;
+          else if (c === ',') { row.push(field); field = ""; }
+          else if (c === '\n' || c === '\r') {
+            if (c === '\r' && text.charAt(i + 1) === '\n') i++;
+            row.push(field); field = "";
+            rows.push(row); row = [];
+          } else field += c;
+        }
+        if (field !== "" || row.length) { row.push(field); rows.push(row); }
+        return rows;
+      }
+      function parseSheetCSV(text) {
+        // State-tab parser (Type | Serial | Text) built on the raw rows.
+        var rows = parseCSVRows(text);
+        var state = { completed: [], delivered: [], complaints: {}, parts: {}, labor: {}, pickedUp: {} };
+        rows.forEach(function (r) {
+          if (!r.length) return;
+          var type = (r[0] || "").trim().toLowerCase();
+          var serial = (r[1] || "").trim();
+          if (!serial) return;
+          if (type === "completed") {
+            if (state.completed.indexOf(serial) === -1) state.completed.push(serial);
+          } else if (type === "delivered") {
+            if (state.delivered.indexOf(serial) === -1) state.delivered.push(serial);
+          } else if (type === "complaint") {
+            state.complaints[serial] = (r[2] || "").trim();
+          } else if (type === "parts") {
+            state.parts[serial] = (r[2] || "").trim();
+          } else if (type === "labor") {
+            state.labor[serial] = (r[2] || "").trim();
+          } else if (type === "picked_up") {
+            state.pickedUp[serial] = (r[2] || "").trim();
+          }
+        });
+        return state;
+      }
+      function applySheetState(state) {
+        if (!state) return;
+        if (state.completed) COMPLETED_SERIALS = state.completed.slice();
+        reconcileCompletedFlags(state.completed || []);
+        if (state.delivered) DELIVERED_SERIALS = state.delivered.slice();
+        var map = state.complaints || {};
+        MACHINES.forEach(function (m) {
+          if (Object.prototype.hasOwnProperty.call(map, m.serial)) m.complaint = map[m.serial];
+          else delete m.complaint;
+        });
+        var partsMap = state.parts || {};
+        MACHINES.forEach(function (m) {
+          if (Object.prototype.hasOwnProperty.call(partsMap, m.serial)) m.parts = partsMap[m.serial];
+          else delete m.parts;
+        });
+        var laborMap = state.labor || {};
+        MACHINES.forEach(function (m) {
+          if (Object.prototype.hasOwnProperty.call(laborMap, m.serial)) m.labor = laborMap[m.serial];
+          else delete m.labor;
+        });
+        var pickedUpMap = state.pickedUp || {};
+        MACHINES.forEach(function (m) {
+          if (Object.prototype.hasOwnProperty.call(pickedUpMap, m.serial)) m.pickedUp = pickedUpMap[m.serial];
+          else delete m.pickedUp;
+        });
+        renderRows();
+        if (currentMachine) renderPartsOrdered(currentMachine);
+        if (currentMachine) renderSavedCost(currentMachine);
+        // If this machine turned completed since its page opened, its edit
+        // tools go away with it — no editing a completed machine.
+        if (currentMachine && isCompleted(currentMachine.serial)) {
+          $("formWrap").classList.add("hidden");
+          $("detailsToggleBtn").classList.add("hidden");
+        }
+      }
+      function loadSheetState() {
+        if (!SHEET_CSV_URL || SHEET_CSV_URL.indexOf("REPLACE_") === 0) return;
+        try {
+          var ctl = ("AbortController" in window) ? new AbortController() : null;
+          var timer = setTimeout(function () { if (ctl) ctl.abort(); }, 8000);
+          var opts = { cache: "no-store" };
+          if (ctl) opts.signal = ctl.signal;
+          fetch(SHEET_CSV_URL, opts)
+            .then(function (r) {
+              clearTimeout(timer);
+              if (!r.ok) throw new Error("sheet fetch HTTP " + r.status);
+              return r.text();
+            })
+            .then(function (text) {
+              try { applySheetState(parseSheetCSV(text)); } catch (e) {}
+            })
+            .catch(function () {
+              clearTimeout(timer);
+              // Sheet unreachable — keep the baked-in fallback. The page
+              // already rendered from it, so nothing looks broken.
+            });
+        } catch (e) {
+          // Same: the fallback render stands.
+        }
+      }
+
+      /* ---------- Init ---------- */
+      (function init() {
+        $("fDate").value = todayISO();
+        syncDateDisplay();
+        resetParts();
+        renderTotalCost();
+        $("addPartBtn").addEventListener("click", function () {
+          $("partsList").appendChild(makePartRow(true));
+        });
+        $("partsList").addEventListener("input", renderTotalCost);
+        $("fLabor").addEventListener("input", renderTotalCost);
+        $("fDate").addEventListener("change", syncDateDisplay);
+        $("fDate").addEventListener("click", function () {
+          // Some browsers focus the input on tap without opening the picker —
+          // request it explicitly when available.
+          try { if ($("fDate").showPicker) $("fDate").showPicker(); } catch (e) {}
+        });
+        purgeLegacyCompletedFlags();
+        loadStoredHistory();
+        renderRows();
+        renderHistory();
+        loadSheetState();
+        $("historyLinkBtn").addEventListener("click", openHistory);
+        $("historyBackBtn").addEventListener("click", function () { showStep("stepPick"); });
+        showStep("stepPick");
+      })();
+    </script>
+  </body>
+</html>
